@@ -1,0 +1,12 @@
+# Normalize line endings to LF in the repository
+* text=auto eol=lf
+*.py text eol=lf
+*.md text eol=lf
+*.toml text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.json text eol=lf
+*.j2 text eol=lf
+*.js text eol=lf
+*.ts text eol=lf
+Dockerfile text eol=lf

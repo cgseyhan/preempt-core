@@ -1,0 +1,140 @@
+"""Scan commands: `preemptcore scan repo` and `preemptcore scan endpoint`."""
+
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+
+import typer
+from rich.console import Console
+from rich.panel import Panel
+from rich.table import Table
+
+from preemptcore.core.models import ScanResult, ScanTarget
+from preemptcore.core.scoring import calculate_score
+
+scan_app = typer.Typer(help="Scan a repository or TLS endpoint.", no_args_is_help=True)
+console = Console()
+
+
+@scan_app.command("repo")
+def scan_repo(
+    path: Path = typer.Argument(..., help="Path to the local repository to scan."),
+    output: Path = typer.Option(
+        Path("./preemptcore-output"),
+        "--output",
+        "-o",
+        help="Directory to write report files.",
+    ),
+    fmt: str = typer.Option(
+        "all",
+        "--format",
+        "-f",
+        help="Output format: json | html | sarif | all",
+    ),
+) -> None:
+    """Scan a local repository for quantum-relevant cryptographic usage."""
+    if not path.exists():
+        console.print(f"[bold red]Error:[/bold red] Path does not exist: {path}")
+        raise typer.Exit(code=1)
+
+    console.print(Panel(f"[bold cyan]Scanning repository:[/bold cyan] {path.resolve()}"))
+
+    # Import here to keep CLI startup fast
+    from preemptcore.scanners.repo_scanner import RepoScanner
+
+    scanner = RepoScanner()
+    result: ScanResult = scanner.scan(path)
+
+    breakdown = calculate_score(result)
+    result.q_score = breakdown.final_score
+    result.readiness_label = breakdown.readiness_label
+
+    _print_summary(result)
+    _write_reports(result, output, fmt)
+
+
+@scan_app.command("endpoint")
+def scan_endpoint(
+    host: str = typer.Argument(..., help="Domain or URL to scan (e.g. api.example.com)."),
+    output: Path = typer.Option(
+        Path("./preemptcore-output"),
+        "--output",
+        "-o",
+        help="Directory to write report files.",
+    ),
+) -> None:
+    """Scan a TLS endpoint for post-quantum migration relevance."""
+    console.print(Panel(f"[bold cyan]Scanning endpoint:[/bold cyan] {host}"))
+
+    from preemptcore.scanners.endpoint_scanner import EndpointScanner
+
+    scanner = EndpointScanner()
+    result: ScanResult = scanner.scan(host)
+
+    breakdown = calculate_score(result)
+    result.q_score = breakdown.final_score
+    result.readiness_label = breakdown.readiness_label
+
+    _print_summary(result)
+    _write_reports(result, output, "json")
+
+
+def _print_summary(result: ScanResult) -> None:
+    """Print a rich summary table to the terminal."""
+    high = sum(1 for f in result.findings if f.severity.value in ("high", "critical"))
+    medium = sum(1 for f in result.findings if f.severity.value == "medium")
+    low = sum(1 for f in result.findings if f.severity.value in ("low", "info"))
+    qr = sum(1 for f in result.findings if f.quantum_relevance.value != "none")
+
+    label_color = {
+        "Strong": "green",
+        "Good": "green",
+        "Moderate": "yellow",
+        "Low": "yellow",
+        "Critical": "red",
+    }.get(result.readiness_label, "white")
+
+    table = Table(title="PreemptCore Scan Complete", show_header=False, box=None)
+    table.add_column("Key", style="bold")
+    table.add_column("Value")
+    table.add_row("Project", result.project_name)
+    table.add_row("Scan ID", result.scan_id)
+    table.add_row("Total findings", str(len(result.findings)))
+    table.add_row("Quantum-relevant", str(qr))
+    table.add_row("High / Critical", str(high))
+    table.add_row("Medium", str(medium))
+    table.add_row("Low / Info", str(low))
+    table.add_row(
+        "Q-Score",
+        f"[bold {label_color}]{result.q_score}/100 — {result.readiness_label}[/bold {label_color}]",
+    )
+    console.print(table)
+
+
+def _write_reports(result: ScanResult, output: Path, fmt: str) -> None:
+    """Write report files in the requested format(s)."""
+    output.mkdir(parents=True, exist_ok=True)
+
+    from preemptcore.reports.json_report import write_json_report
+    from preemptcore.reports.html_report import write_html_report
+    from preemptcore.reports.sarif_report import write_sarif_report
+
+    written: list[Path] = []
+
+    if fmt in ("json", "all"):
+        p = write_json_report(result, output)
+        written.append(p)
+
+    if fmt in ("html", "all"):
+        p = write_html_report(result, output)
+        written.append(p)
+
+    if fmt in ("sarif", "all"):
+        p = write_sarif_report(result, output)
+        written.append(p)
+
+    if written:
+        console.print("\n[bold]Reports written:[/bold]")
+        for p in written:
+            console.print(f"  [green][OK][/green] {p}")

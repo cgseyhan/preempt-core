@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PreemptCore Report — {{ result.project_name }}</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --surface: #1e293b;
+      --border: #334155;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --high: #ef4444;
+      --medium: #f97316;
+      --low: #facc15;
+      --info: #94a3b8;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 2rem;
+    }
+
+    header {
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    header h1 {
+      font-size: 1.75rem;
+      color: var(--accent);
+    }
+
+    header p {
+      color: var(--muted);
+      font-size: 0.875rem;
+      margin-top: 0.25rem;
+    }
+
+    .score-block {
+      display: inline-flex;
+      align-items: center;
+      gap: 1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1rem 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .score-number {
+      font-size: 3rem;
+      font-weight: 700;
+      color: {{ readiness_color }};
+    }
+
+    .score-label {
+      font-size: 1rem;
+      color: var(--muted);
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      text-align: center;
+    }
+
+    .stat-card .val {
+      font-size: 2rem;
+      font-weight: 700;
+    }
+
+    .stat-card .lbl {
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    h2 {
+      font-size: 1.25rem;
+      color: var(--accent);
+      margin-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.5rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 2rem;
+      font-size: 0.875rem;
+    }
+
+    th {
+      text-align: left;
+      padding: 0.6rem 0.75rem;
+      background: var(--surface);
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.7rem;
+      letter-spacing: 0.07em;
+    }
+
+    td {
+      padding: 0.6rem 0.75rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    tr:hover td { background: var(--surface); }
+
+    .badge {
+      display: inline-block;
+      padding: 0.15rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .sev-critical, .sev-high { background: #7f1d1d; color: var(--high); }
+    .sev-medium  { background: #431407; color: var(--medium); }
+    .sev-low     { background: #713f12; color: var(--low); }
+    .sev-info    { background: #1e293b; color: var(--info); }
+
+    .qr-high   { color: var(--high); font-weight: 600; }
+    .qr-medium { color: var(--medium); font-weight: 600; }
+    .qr-low    { color: var(--low); }
+    .qr-none   { color: var(--muted); }
+
+    .warning-box {
+      background: #1e293b;
+      border-left: 4px solid #f97316;
+      border-radius: 0.5rem;
+      padding: 1rem 1.25rem;
+      margin-bottom: 2rem;
+      font-size: 0.875rem;
+      color: var(--muted);
+    }
+
+    footer {
+      margin-top: 3rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    code {
+      background: var(--surface);
+      border-radius: 3px;
+      padding: 0.1em 0.3em;
+      font-size: 0.85em;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>PreemptCore — Post-Quantum Readiness Report</h1>
+    <p>Project: <strong>{{ result.project_name }}</strong> &nbsp;|&nbsp; Scan ID: <code>{{ result.scan_id }}</code> &nbsp;|&nbsp; Generated: {{ result.created_at }}</p>
+  </header>
+
+  <div class="warning-box">
+    ⚠️ <strong>Important:</strong> RSA/ECC usage is not necessarily an immediately exploitable vulnerability today.
+    These findings indicate <em>post-quantum migration relevance</em> and long-term cryptographic risk.
+    Consult your security team before making changes to production cryptography.
+  </div>
+
+  <div class="score-block">
+    <div class="score-number">{{ result.q_score }}</div>
+    <div>
+      <div style="font-size:1.25rem; font-weight:600;">/ 100</div>
+      <div class="score-label">Q-Score — <strong style="color:{{ readiness_color }}">{{ result.readiness_label }}</strong></div>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat-card">
+      <div class="val">{{ result.findings | length }}</div>
+      <div class="lbl">Total findings</div>
+    </div>
+    <div class="stat-card">
+      <div class="val" style="color:var(--accent)">{{ quantum_relevant }}</div>
+      <div class="lbl">Quantum-relevant</div>
+    </div>
+    <div class="stat-card">
+      <div class="val" style="color:var(--high)">{{ high }}</div>
+      <div class="lbl">High / Critical</div>
+    </div>
+    <div class="stat-card">
+      <div class="val" style="color:var(--medium)">{{ medium }}</div>
+      <div class="lbl">Medium</div>
+    </div>
+    <div class="stat-card">
+      <div class="val" style="color:var(--low)">{{ low }}</div>
+      <div class="lbl">Low / Info</div>
+    </div>
+  </div>
+
+  <h2>Findings</h2>
+  {% if result.findings %}
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Title</th>
+        <th>Severity</th>
+        <th>Quantum Relevance</th>
+        <th>Location</th>
+        <th>Category</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for f in result.findings %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td>
+          <strong>{{ f.title }}</strong>
+          {% if f.description %}
+          <br/><small style="color:var(--muted)">{{ f.description[:120] }}{% if f.description|length > 120 %}…{% endif %}</small>
+          {% endif %}
+          {% if f.recommendation %}
+          <br/><small style="color:#86efac; margin-top:4px; display:block">→ {{ f.recommendation[:100] }}{% if f.recommendation|length > 100 %}…{% endif %}</small>
+          {% endif %}
+        </td>
+        <td><span class="badge sev-{{ f.severity.value }}">{{ f.severity.value }}</span></td>
+        <td><span class="qr-{{ f.quantum_relevance.value }}">{{ f.quantum_relevance.value }}</span></td>
+        <td>
+          {% if f.file_path %}
+          <code>{{ f.file_path }}{% if f.line_number %}:{{ f.line_number }}{% endif %}</code>
+          {% else %}—{% endif %}
+        </td>
+        <td><code>{{ f.category }}</code></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p style="color:var(--muted)">No findings detected in this scan.</p>
+  {% endif %}
+
+  <h2>NIST PQC Standards Reference</h2>
+  <table>
+    <thead>
+      <tr><th>Algorithm</th><th>Standard</th><th>Use Case</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>ML-KEM</td><td>FIPS 203</td><td>Key encapsulation / key exchange</td></tr>
+      <tr><td>ML-DSA</td><td>FIPS 204</td><td>Digital signatures</td></tr>
+      <tr><td>SLH-DSA</td><td>FIPS 205</td><td>Digital signatures (stateless)</td></tr>
+      <tr><td>FN-DSA</td><td>FIPS 206</td><td>Digital signatures (lattice-hash)</td></tr>
+    </tbody>
+  </table>
+
+  <footer>
+    Generated by <strong>PreemptCore v0.1.0</strong> &nbsp;|&nbsp;
+    This report is for informational purposes only and does not constitute a security audit.
+  </footer>
+</body>
+</html>

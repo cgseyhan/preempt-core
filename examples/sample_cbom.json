@@ -1,0 +1,48 @@
+{
+  "project": "vulnerable_python_app",
+  "scan_id": "scan_example_001",
+  "created_at": "2026-06-05T12:00:00",
+  "targets": [
+    {
+      "target_type": "repo",
+      "value": "/examples/vulnerable_python_app"
+    }
+  ],
+  "findings": [
+    {
+      "id": "py-rsa-001-abcd1234",
+      "title": "RSA key generation detected",
+      "description": "This code generates RSA private keys using the cryptography library. RSA relies on classical public-key cryptography and should be included in a post-quantum migration inventory.",
+      "severity": "high",
+      "quantum_relevance": "high",
+      "file_path": "examples/vulnerable_python_app/app.py",
+      "line_number": 6,
+      "evidence": "private_key = rsa.generate_private_key(",
+      "algorithm": "RSA",
+      "category": "classical_pki",
+      "recommendation": "Evaluate protocol-compatible migration options. ML-DSA (FIPS 204) is relevant for digital signatures; ML-KEM (FIPS 203) for key establishment.",
+      "references": [
+        "https://csrc.nist.gov/pubs/fips/203/final",
+        "https://csrc.nist.gov/pubs/fips/204/final"
+      ]
+    },
+    {
+      "id": "py-md5-001-efgh5678",
+      "title": "MD5 hash function usage detected",
+      "description": "MD5 is a cryptographically broken hash function. It should not be used for security-sensitive purposes.",
+      "severity": "medium",
+      "quantum_relevance": "low",
+      "file_path": "examples/vulnerable_python_app/app.py",
+      "line_number": 11,
+      "evidence": "digest = hashlib.md5(b\"sensitive_data\").hexdigest()",
+      "algorithm": "MD5",
+      "category": "deprecated_crypto",
+      "recommendation": "Replace MD5 with SHA-256 or SHA-3 for integrity verification. MD5 is not suitable for password hashing — use bcrypt or Argon2.",
+      "references": [
+        "https://www.nist.gov/publications/nist-policy-cryptographic-key-management"
+      ]
+    }
+  ],
+  "q_score": 44,
+  "readiness_label": "Low"
+}
