@@ -20,7 +20,7 @@ Bonuses:
 
 from __future__ import annotations
 
-from preemptcore.core.models import Finding, QuantumRelevance, ScoreBreakdown, ScanResult
+from preemptcore.core.models import Finding, QuantumRelevance, ScanResult, ScoreBreakdown
 
 # Category constants used by rules
 CATEGORY_DEPRECATED_CRYPTO = "deprecated_crypto"

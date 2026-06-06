@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import sys
 from pathlib import Path
 
 import typer
@@ -10,7 +9,7 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
-from preemptcore.core.models import ScanResult, ScanTarget
+from preemptcore.core.models import ScanResult
 from preemptcore.core.scoring import calculate_score
 
 scan_app = typer.Typer(help="Scan a repository or TLS endpoint.", no_args_is_help=True)
@@ -30,7 +29,12 @@ def scan_repo(
         "all",
         "--format",
         "-f",
-        help="Output format: json | html | sarif | all",
+        help="Output format: json | html | sarif | markdown | all",
+    ),
+    min_q_score: int = typer.Option(
+        0,
+        "--min-q-score",
+        help="Fail the scan (exit code 1) if final Q-Score is below this threshold.",
     ),
 ) -> None:
     """Scan a local repository for quantum-relevant cryptographic usage."""
@@ -53,6 +57,10 @@ def scan_repo(
     _print_summary(result)
     _write_reports(result, output, fmt)
 
+    if result.q_score < min_q_score:
+        console.print(f"\n[bold red]Error:[/bold red] Final Q-Score ({result.q_score}) is below the required threshold of {min_q_score}.")
+        raise typer.Exit(code=1)
+
 
 @scan_app.command("endpoint")
 def scan_endpoint(
@@ -62,6 +70,11 @@ def scan_endpoint(
         "--output",
         "-o",
         help="Directory to write report files.",
+    ),
+    min_q_score: int = typer.Option(
+        0,
+        "--min-q-score",
+        help="Fail the scan (exit code 1) if final Q-Score is below this threshold.",
     ),
 ) -> None:
     """Scan a TLS endpoint for post-quantum migration relevance."""
@@ -78,6 +91,10 @@ def scan_endpoint(
 
     _print_summary(result)
     _write_reports(result, output, "json")
+
+    if result.q_score < min_q_score:
+        console.print(f"\n[bold red]Error:[/bold red] Final Q-Score ({result.q_score}) is below the required threshold of {min_q_score}.")
+        raise typer.Exit(code=1)
 
 
 def _print_summary(result: ScanResult) -> None:
@@ -116,8 +133,9 @@ def _write_reports(result: ScanResult, output: Path, fmt: str) -> None:
     """Write report files in the requested format(s)."""
     output.mkdir(parents=True, exist_ok=True)
 
-    from preemptcore.reports.json_report import write_json_report
     from preemptcore.reports.html_report import write_html_report
+    from preemptcore.reports.json_report import write_json_report
+    from preemptcore.reports.markdown_report import write_markdown_report
     from preemptcore.reports.sarif_report import write_sarif_report
 
     written: list[Path] = []
@@ -132,6 +150,10 @@ def _write_reports(result: ScanResult, output: Path, fmt: str) -> None:
 
     if fmt in ("sarif", "all"):
         p = write_sarif_report(result, output)
+        written.append(p)
+
+    if fmt in ("markdown", "all"):
+        p = write_markdown_report(result, output)
         written.append(p)
 
     if written:

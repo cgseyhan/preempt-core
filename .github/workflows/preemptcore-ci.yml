@@ -1,0 +1,41 @@
+name: PreemptCore Scan
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+      pull-requests: write
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run PreemptCore Scanner
+        uses: preemptcore/preemptcore@main  # Or uses: ./ if local
+        with:
+          path: .
+          min-q-score: 50
+          format: all
+
+      - name: Upload SARIF report
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: preemptcore-output/report.sarif
+          category: preemptcore
+
+      - name: Post PR Comment
+        uses: peter-evans/create-or-update-comment@v4
+        if: github.event_name == 'pull_request' && always()
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body-path: preemptcore-output/report.md
+          edit-mode: replace

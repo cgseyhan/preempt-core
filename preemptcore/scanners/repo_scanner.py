@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import typing
 import uuid
 from pathlib import Path
 
@@ -33,7 +34,7 @@ class RepoScanner:
 
         return result
 
-    def _iter_files(self, root: Path):  # type: ignore[return]
+    def _iter_files(self, root: Path) -> typing.Iterator[Path]:
         """Yield all non-ignored files under root."""
         for item in root.rglob("*"):
             if item.is_file() and not self._is_ignored(item):

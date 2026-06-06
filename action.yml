@@ -1,0 +1,55 @@
+name: "PreemptCore Scan"
+description: "Scan repositories for post-quantum cryptographic readiness"
+author: "PreemptCore Team"
+
+inputs:
+  path:
+    description: "Path to the local repository to scan"
+    required: true
+    default: "."
+  min-q-score:
+    description: "Fail the workflow if Q-Score is below this threshold"
+    required: false
+    default: "0"
+  output-dir:
+    description: "Directory to write the reports"
+    required: false
+    default: "preemptcore-output"
+  format:
+    description: "Report formats (json, html, sarif, markdown, all)"
+    required: false
+    default: "all"
+  python-version:
+    description: "Python version to use for PreemptCore"
+    required: false
+    default: "3.12"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    - name: Install PreemptCore
+      shell: bash
+      run: |
+        python -m pip install --upgrade pip
+        pip install ${{ github.action_path }}
+
+    - name: Run PreemptCore Scan
+      shell: bash
+      run: |
+        preemptcore scan repo "${{ inputs.path }}" \
+          --output "${{ inputs.output-dir }}" \
+          --format "${{ inputs.format }}" \
+          --min-q-score "${{ inputs.min-q-score }}"
+
+    - name: Add Report to GitHub Step Summary
+      if: always()
+      shell: bash
+      run: |
+        if [ -f "${{ inputs.output-dir }}/report.md" ]; then
+          cat "${{ inputs.output-dir }}/report.md" >> $GITHUB_STEP_SUMMARY
+        fi

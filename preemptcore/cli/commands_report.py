@@ -28,6 +28,7 @@ def report(
         raise typer.Exit(code=1)
 
     import json
+
     from preemptcore.core.models import ScanResult
 
     data = json.loads(cbom.read_text(encoding="utf-8"))
@@ -36,8 +37,8 @@ def report(
     out_dir = output or cbom.parent
 
     from preemptcore.reports.html_report import write_html_report
-    from preemptcore.reports.sarif_report import write_sarif_report
     from preemptcore.reports.json_report import write_json_report
+    from preemptcore.reports.sarif_report import write_sarif_report
 
     if fmt == "html":
         p = write_html_report(result, out_dir)

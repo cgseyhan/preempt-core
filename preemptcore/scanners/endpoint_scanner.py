@@ -5,7 +5,6 @@ from __future__ import annotations
 import socket
 import ssl
 import uuid
-from datetime import datetime
 
 from preemptcore.core.models import (
     Finding,

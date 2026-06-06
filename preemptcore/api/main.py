@@ -3,8 +3,8 @@
 from fastapi import FastAPI
 
 from preemptcore import __version__
-from preemptcore.api.routes_scans import router as scans_router
 from preemptcore.api.routes_reports import router as reports_router
+from preemptcore.api.routes_scans import router as scans_router
 
 app = FastAPI(
     title="PreemptCore API",
