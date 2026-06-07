@@ -11,6 +11,8 @@ from rich.table import Table
 
 from preemptcore.core.models import ScanResult
 from preemptcore.core.scoring import calculate_score
+from preemptcore.storage.db import create_db_and_tables, get_session
+from preemptcore.storage.repositories import ScanRepository
 
 scan_app = typer.Typer(help="Scan a repository or TLS endpoint.", no_args_is_help=True)
 console = Console()
@@ -54,6 +56,7 @@ def scan_repo(
     result.q_score = breakdown.final_score
     result.readiness_label = breakdown.readiness_label
 
+    _save_to_db(result)
     _print_summary(result)
     _write_reports(result, output, fmt)
 
@@ -89,12 +92,25 @@ def scan_endpoint(
     result.q_score = breakdown.final_score
     result.readiness_label = breakdown.readiness_label
 
+    _save_to_db(result)
     _print_summary(result)
     _write_reports(result, output, "json")
 
     if result.q_score < min_q_score:
         console.print(f"\n[bold red]Error:[/bold red] Final Q-Score ({result.q_score}) is below the required threshold of {min_q_score}.")
         raise typer.Exit(code=1)
+
+def _save_to_db(result: ScanResult) -> None:
+    """Save the scan result to the local database."""
+    try:
+        create_db_and_tables()
+        session_gen = get_session()
+        session = next(session_gen)
+        repo = ScanRepository(session)
+        repo.save_scan(result)
+    except Exception as e:
+        console.print(f"[yellow]Warning: Could not save scan to history database: {e}[/yellow]")
+
 
 
 def _print_summary(result: ScanResult) -> None:

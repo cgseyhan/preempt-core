@@ -4,6 +4,7 @@ import typer
 
 from preemptcore.cli.commands_report import report_app
 from preemptcore.cli.commands_scan import scan_app
+from preemptcore.cli.commands_dashboard import dashboard_app
 
 app = typer.Typer(
     name="preemptcore",
@@ -18,7 +19,7 @@ app = typer.Typer(
 
 app.add_typer(scan_app, name="scan")
 app.add_typer(report_app, name="report")
-
+app.add_typer(dashboard_app, name="dashboard")
 
 @app.command()
 def version() -> None:
