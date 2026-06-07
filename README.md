@@ -21,7 +21,18 @@ preemptcore scan endpoint api.example.com
 
 # Generate an HTML report from a CBOM
 preemptcore report ./preemptcore-output/cbom.json --format html
+
+# Start the Web Dashboard
+preemptcore dashboard
 ```
+
+## Features
+
+- **Local Repository Scanner**: Analyze Python, JS/TS, Go, Java, and config files for cryptographic usage.
+- **TLS Endpoint Scanner**: Detect deprecated legacy protocols or classical key exchange methods.
+- **Web Dashboard**: Interactive UI with charts to track post-quantum readiness over time.
+- **CI/CD Ready**: Includes a composite GitHub Action to enforce Q-Score thresholds and comment on PRs.
+- **Reporting**: Exports to JSON (CBOM), HTML, Markdown, and SARIF for GitHub Security Center integration.
 
 ## Output
 
@@ -42,6 +53,19 @@ Reports written to:
   ./preemptcore-output/report.html
   ./preemptcore-output/report.sarif
 ```
+
+## GitHub Actions Integration
+
+You can integrate PreemptCore directly into your CI/CD pipeline to block PRs that drop your Q-Score below a certain threshold:
+
+```yaml
+- uses: cgseyhan/preempt-core@master
+  with:
+    path: '.'
+    min-q-score: 50
+    format: 'all'
+```
+
 
 ## Development
 
