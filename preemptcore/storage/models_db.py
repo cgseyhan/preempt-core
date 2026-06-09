@@ -44,6 +44,7 @@ class DBScanResult(SQLModel, table=True):
     created_at: datetime
     q_score: int
     readiness_label: str
+    client_name: Optional[str] = Field(default=None)
 
     targets: list[DBScanTarget] = Relationship(back_populates="scan", cascade_delete=True)
     findings: list[DBFinding] = Relationship(back_populates="scan", cascade_delete=True)
@@ -56,6 +57,7 @@ class DBScanResult(SQLModel, table=True):
             created_at=result.created_at,
             q_score=result.q_score,
             readiness_label=result.readiness_label,
+            client_name=result.client_name,
         )
         for t in result.targets:
             db_scan.targets.append(DBScanTarget(target_type=t.target_type, value=t.value))
@@ -79,7 +81,7 @@ class DBScanResult(SQLModel, table=True):
 
     def to_domain(self) -> ScanResult:
         domain_targets = [
-            ScanTarget(target_type=t.target_type, value=t.value) # type: ignore
+            ScanTarget(target_type=t.target_type, value=t.value)
             for t in self.targets
         ]
         domain_findings = []
@@ -108,4 +110,5 @@ class DBScanResult(SQLModel, table=True):
             findings=domain_findings,
             q_score=self.q_score,
             readiness_label=self.readiness_label,
+            client_name=self.client_name,
         )

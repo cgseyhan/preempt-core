@@ -19,11 +19,14 @@ preemptcore scan repo ./examples/vulnerable_python_app
 # Scan a TLS endpoint
 preemptcore scan endpoint api.example.com
 
-# Generate an HTML report from a CBOM
-preemptcore report ./preemptcore-output/cbom.json --format html
+# Generate a PDF report from a CBOM
+preemptcore report ./preemptcore-output/cbom.json --format pdf
 
 # Start the Web Dashboard
 preemptcore dashboard
+
+# Schedule a daily scan for a specific client
+preemptcore schedule run ./examples/vulnerable_python_app --client "Acme Corp"
 ```
 
 ## Features
@@ -31,8 +34,9 @@ preemptcore dashboard
 - **Local Repository Scanner**: Analyze Python, JS/TS, Go, Java, and config files for cryptographic usage.
 - **TLS Endpoint Scanner**: Detect deprecated legacy protocols or classical key exchange methods.
 - **Web Dashboard**: Interactive UI with charts to track post-quantum readiness over time.
+- **Consultant Mode**: Multi-client tracking (`--client`), scheduled scans (`preemptcore schedule run`), and white-label **PDF Export**.
 - **CI/CD Ready**: Includes a composite GitHub Action to enforce Q-Score thresholds and comment on PRs.
-- **Reporting**: Exports to JSON (CBOM), HTML, Markdown, and SARIF for GitHub Security Center integration.
+- **Reporting**: Exports to JSON (CBOM), HTML, Markdown, PDF, and SARIF for GitHub Security Center integration.
 
 ## Output
 

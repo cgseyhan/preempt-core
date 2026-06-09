@@ -18,10 +18,12 @@ router = APIRouter()
 
 class RepoScanRequest(BaseModel):
     path: str
+    client_name: str | None = None
 
 
 class EndpointScanRequest(BaseModel):
     host: str
+    client_name: str | None = None
 
 
 @router.post("/repo", response_model=ScanResult)
@@ -41,6 +43,7 @@ async def scan_repo(
     breakdown = calculate_score(result)
     result.q_score = breakdown.final_score
     result.readiness_label = breakdown.readiness_label
+    result.client_name = req.client_name
 
     repo = ScanRepository(session)
     repo.save_scan(result)
@@ -60,6 +63,7 @@ async def scan_endpoint(
     breakdown = calculate_score(result)
     result.q_score = breakdown.final_score
     result.readiness_label = breakdown.readiness_label
+    result.client_name = req.client_name
 
     repo = ScanRepository(session)
     repo.save_scan(result)

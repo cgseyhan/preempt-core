@@ -33,7 +33,7 @@ def run_dashboard() -> None:
     console.print(Panel("[bold green]Starting PreemptCore Dashboard...[/bold green]\nListening at: http://localhost:8000\nPress Ctrl+C to stop.", expand=False))
     
     # Open browser after a short delay
-    def open_browser():
+    def open_browser() -> None:
         time.sleep(1.5)
         webbrowser.open("http://localhost:8000")
         

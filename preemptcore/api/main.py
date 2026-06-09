@@ -39,7 +39,7 @@ if dashboard_dir.exists():
     app.mount("/assets", StaticFiles(directory=dashboard_dir / "assets"), name="assets")
     
     @app.get("/{full_path:path}")
-    async def serve_dashboard(full_path: str):
+    async def serve_dashboard(full_path: str) -> FileResponse | dict[str, str]:
         # Serve index.html for all non-API paths to support React Router
         if full_path.startswith("api/"):
             # Should not happen because API routes are defined above, but just in case

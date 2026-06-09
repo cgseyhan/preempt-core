@@ -14,7 +14,7 @@ console = Console()
 @report_app.command()
 def report(
     cbom: Path = typer.Argument(..., help="Path to a cbom.json file produced by a scan."),
-    fmt: str = typer.Option("html", "--format", "-f", help="Output format: html | sarif | json"),
+    fmt: str = typer.Option("html", "--format", "-f", help="Output format: html | sarif | json | pdf"),
     output: Path = typer.Option(
         None,
         "--output",
@@ -39,11 +39,14 @@ def report(
     from preemptcore.reports.html_report import write_html_report
     from preemptcore.reports.json_report import write_json_report
     from preemptcore.reports.sarif_report import write_sarif_report
+    from preemptcore.reports.pdf_report import write_pdf_report
 
     if fmt == "html":
         p = write_html_report(result, out_dir)
     elif fmt == "sarif":
         p = write_sarif_report(result, out_dir)
+    elif fmt == "pdf":
+        p = write_pdf_report(result, out_dir)
     else:
         p = write_json_report(result, out_dir)
 

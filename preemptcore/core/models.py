@@ -58,6 +58,7 @@ class ScanResult(BaseModel):
     findings: list[Finding] = Field(default_factory=list)
     q_score: int = 100
     readiness_label: str = "Strong"
+    client_name: str | None = None
 
 
 class ScoreBreakdown(BaseModel):

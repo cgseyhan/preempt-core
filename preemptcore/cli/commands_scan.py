@@ -38,6 +38,12 @@ def scan_repo(
         "--min-q-score",
         help="Fail the scan (exit code 1) if final Q-Score is below this threshold.",
     ),
+    client: str | None = typer.Option(
+        None,
+        "--client",
+        "-c",
+        help="Client or organization name for the report.",
+    ),
 ) -> None:
     """Scan a local repository for quantum-relevant cryptographic usage."""
     if not path.exists():
@@ -55,6 +61,7 @@ def scan_repo(
     breakdown = calculate_score(result)
     result.q_score = breakdown.final_score
     result.readiness_label = breakdown.readiness_label
+    result.client_name = client
 
     _save_to_db(result)
     _print_summary(result)
@@ -79,6 +86,12 @@ def scan_endpoint(
         "--min-q-score",
         help="Fail the scan (exit code 1) if final Q-Score is below this threshold.",
     ),
+    client: str | None = typer.Option(
+        None,
+        "--client",
+        "-c",
+        help="Client or organization name for the report.",
+    ),
 ) -> None:
     """Scan a TLS endpoint for post-quantum migration relevance."""
     console.print(Panel(f"[bold cyan]Scanning endpoint:[/bold cyan] {host}"))
@@ -91,6 +104,7 @@ def scan_endpoint(
     breakdown = calculate_score(result)
     result.q_score = breakdown.final_score
     result.readiness_label = breakdown.readiness_label
+    result.client_name = client
 
     _save_to_db(result)
     _print_summary(result)
