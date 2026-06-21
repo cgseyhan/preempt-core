@@ -2,9 +2,9 @@
 
 import typer
 
+from preemptcore.cli.commands_dashboard import dashboard_app
 from preemptcore.cli.commands_report import report_app
 from preemptcore.cli.commands_scan import scan_app
-from preemptcore.cli.commands_dashboard import dashboard_app
 from preemptcore.cli.commands_schedule import schedule_app
 
 app = typer.Typer(

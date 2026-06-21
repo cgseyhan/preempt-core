@@ -1,10 +1,13 @@
+import os
+import shutil
+from pathlib import Path
+
 from typer.testing import CliRunner
 
 from preemptcore.cli.main import app
 
 runner = CliRunner()
 
-from pathlib import Path
 
 def test_scan_repo_fails_below_threshold(tmp_path: Path) -> None:
     # This repo scan will return a score (e.g. 90 or 100 based on empty dir)

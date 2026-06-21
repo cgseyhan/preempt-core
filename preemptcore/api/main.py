@@ -1,13 +1,16 @@
 """FastAPI application for PreemptCore."""
 
 from pathlib import Path
+
 from fastapi import FastAPI
-from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from preemptcore import __version__
 from preemptcore.api.routes_reports import router as reports_router
 from preemptcore.api.routes_scans import router as scans_router
+from preemptcore.api.routes_schedules import router as schedules_router
+from preemptcore.core.scheduler import init_scheduler, scheduler
 from preemptcore.storage.db import create_db_and_tables
 
 app = FastAPI(
@@ -24,9 +27,16 @@ app = FastAPI(
 @app.on_event("startup")
 def on_startup() -> None:
     create_db_and_tables()
+    scheduler.start()
+    init_scheduler()
+
+@app.on_event("shutdown")
+def on_shutdown() -> None:
+    scheduler.shutdown()
 
 app.include_router(scans_router, prefix="/api/scans", tags=["scans"])
 app.include_router(reports_router, prefix="/api/reports", tags=["reports"])
+app.include_router(schedules_router, prefix="/api/schedules", tags=["schedules"])
 
 @app.get("/api/health", tags=["health"])
 async def health() -> dict[str, str]:

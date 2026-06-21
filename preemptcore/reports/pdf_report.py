@@ -7,10 +7,11 @@ from pathlib import Path
 from preemptcore.core.models import ScanResult
 from preemptcore.reports.html_report import write_html_report
 
-def write_pdf_report(result: ScanResult, output_dir: Path) -> Path:
+
+def write_pdf_report(result: ScanResult, output_dir: Path, custom_css: str | None = None) -> Path:
     """Render a PDF report from the scan result."""
     try:
-        from weasyprint import HTML
+        from weasyprint import CSS, HTML
     except ImportError as e:
         raise ImportError("weasyprint is not installed. Please install with `pip install weasyprint` to generate PDF reports.") from e
 
@@ -21,6 +22,12 @@ def write_pdf_report(result: ScanResult, output_dir: Path) -> Path:
     html_path = write_html_report(result, output_dir)
     
     # Render PDF
-    HTML(filename=str(html_path)).write_pdf(str(out_path))
+    html_doc = HTML(filename=str(html_path))
+    
+    stylesheets = []
+    if custom_css:
+        stylesheets.append(CSS(string=custom_css))
+        
+    html_doc.write_pdf(str(out_path), stylesheets=stylesheets if stylesheets else None)
     
     return out_path

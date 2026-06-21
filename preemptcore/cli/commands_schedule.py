@@ -32,9 +32,9 @@ def run_scheduler(
     def scheduled_scan_job() -> None:
         console.print(f"\n[bold green]Executing scheduled scan on {target}...[/bold green]")
         if target_type == "repo":
-            from preemptcore.scanners.repo_scanner import RepoScanner
-            from preemptcore.cli.commands_scan import _save_to_db, _print_summary
+            from preemptcore.cli.commands_scan import _print_summary, _save_to_db
             from preemptcore.core.scoring import calculate_score
+            from preemptcore.scanners.repo_scanner import RepoScanner
             
             scanner_repo = RepoScanner()
             p = Path(target)
@@ -44,9 +44,9 @@ def run_scheduler(
                 
             result = scanner_repo.scan(p)
         else:
-            from preemptcore.scanners.endpoint_scanner import EndpointScanner
-            from preemptcore.cli.commands_scan import _save_to_db, _print_summary
+            from preemptcore.cli.commands_scan import _print_summary, _save_to_db
             from preemptcore.core.scoring import calculate_score
+            from preemptcore.scanners.endpoint_scanner import EndpointScanner
             
             scanner_ep = EndpointScanner()
             result = scanner_ep.scan(target)

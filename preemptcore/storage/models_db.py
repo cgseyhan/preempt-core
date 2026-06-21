@@ -6,11 +6,17 @@ from typing import Optional
 
 from sqlmodel import Field, Relationship, SQLModel
 
-from preemptcore.core.models import Finding, FindingSeverity, QuantumRelevance, ScanResult, ScanTarget
+from preemptcore.core.models import (
+    Finding,
+    FindingSeverity,
+    QuantumRelevance,
+    ScanResult,
+    ScanTarget,
+)
 
 
 class DBScanTarget(SQLModel, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
+    id: int | None = Field(default=None, primary_key=True)
     scan_id: str = Field(foreign_key="dbscanresult.scan_id")
     target_type: str
     value: str
@@ -19,7 +25,7 @@ class DBScanTarget(SQLModel, table=True):
 
 
 class DBFinding(SQLModel, table=True):
-    db_id: Optional[int] = Field(default=None, primary_key=True)
+    db_id: int | None = Field(default=None, primary_key=True)
     finding_id: str
     scan_id: str = Field(foreign_key="dbscanresult.scan_id")
     
@@ -27,10 +33,10 @@ class DBFinding(SQLModel, table=True):
     description: str
     severity: str
     quantum_relevance: str
-    file_path: Optional[str] = None
-    line_number: Optional[int] = None
-    evidence: Optional[str] = None
-    algorithm: Optional[str] = None
+    file_path: str | None = None
+    line_number: int | None = None
+    evidence: str | None = None
+    algorithm: str | None = None
     category: str
     recommendation: str
     references_json: str = "[]"
@@ -44,7 +50,7 @@ class DBScanResult(SQLModel, table=True):
     created_at: datetime
     q_score: int
     readiness_label: str
-    client_name: Optional[str] = Field(default=None)
+    client_name: str | None = Field(default=None)
 
     targets: list[DBScanTarget] = Relationship(back_populates="scan", cascade_delete=True)
     findings: list[DBFinding] = Relationship(back_populates="scan", cascade_delete=True)
@@ -112,3 +118,13 @@ class DBScanResult(SQLModel, table=True):
             readiness_label=self.readiness_label,
             client_name=self.client_name,
         )
+
+
+class DBSchedule(SQLModel, table=True):
+    schedule_id: str = Field(primary_key=True)
+    target_type: str
+    target_value: str
+    cron_expression: str
+    client_name: str | None = None
+    created_at: datetime
+    is_active: bool = True

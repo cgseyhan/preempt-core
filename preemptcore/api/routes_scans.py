@@ -71,10 +71,21 @@ async def scan_endpoint(
 
 
 @router.get("", response_model=list[ScanResult])
-async def list_scans(session: Session = Depends(get_session)) -> list[ScanResult]:
-    """Retrieve history of all scans."""
-    repo = ScanRepository(session)
-    return repo.get_all_scans()
+async def list_scans(
+    client_name: str | None = None,
+    session: Session = Depends(get_session)
+) -> list[ScanResult]:
+    """Retrieve history of all scans, optionally filtered by client."""
+    from sqlmodel import select
+
+    from preemptcore.storage.models_db import DBScanResult
+    
+    statement = select(DBScanResult).order_by(DBScanResult.created_at.desc()) # type: ignore
+    if client_name:
+        statement = statement.where(DBScanResult.client_name == client_name)
+        
+    results = session.exec(statement).all()
+    return [r.to_domain() for r in results]
 
 
 @router.get("/{scan_id}", response_model=ScanResult)

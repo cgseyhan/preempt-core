@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import Enum
 from typing import Literal
 
@@ -53,7 +53,7 @@ class ScanResult(BaseModel):
 
     scan_id: str
     project_name: str
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     targets: list[ScanTarget] = Field(default_factory=list)
     findings: list[Finding] = Field(default_factory=list)
     q_score: int = 100
@@ -80,3 +80,15 @@ class ReportSummary(BaseModel):
     medium_priority: int = 0
     low_priority: int = 0
     info_count: int = 0
+
+
+class ScheduleConfig(BaseModel):
+    """Configuration for a scheduled recurring scan."""
+
+    schedule_id: str
+    target_type: Literal["repo", "endpoint"]
+    target_value: str
+    cron_expression: str
+    client_name: str | None = None
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    is_active: bool = True

@@ -5,7 +5,12 @@ from collections.abc import Generator
 from sqlmodel import Session, SQLModel, create_engine
 
 # Import models so SQLModel knows about them before create_all
-from preemptcore.storage.models_db import DBFinding, DBScanResult, DBScanTarget  # noqa: F401
+from preemptcore.storage.models_db import (  # noqa: F401
+    DBFinding,
+    DBScanResult,
+    DBScanTarget,
+    DBSchedule,
+)
 
 sqlite_file_name = "preemptcore.db"
 sqlite_url = f"sqlite:///{sqlite_file_name}"
